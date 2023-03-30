@@ -8,3 +8,8 @@ li button {
     border: none;
     color: red;
 }
+
+
+.remove {
+    display: none;
+}
