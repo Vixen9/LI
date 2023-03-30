@@ -13,12 +13,13 @@
 <body>
 
     <h1>Shoping List</h1>
-
-    <input type="text" id="input" placeholder="Add Item">
-    <br>
-    <button type="submit" class="btn">+ Add Item</button>
-    <br>
-    <input type="text" id="filter" placeholder="Filter Item">
+    <form>
+        <input type="text" name="item" class="input" placeholder="Add Item">
+        <br>
+        <button type="submit" class="btn">+ Add Item</button>
+        <br>
+    </form>
+    <input type="text" class="filter" placeholder="Filter Item">
 
     <div class="list-group">
         <ul class="list">
@@ -28,7 +29,7 @@
 
     <button class="clear">Clear All</button>
     <!-- JavaScript link -->
-    <script src="main.js"></script>
+    <script src="app.js"></script>
 </body>
 
 </html>
