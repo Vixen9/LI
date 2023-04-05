@@ -1,149 +1,180 @@
-// Select element.
+//  Variable
 const form = document.querySelector('.form')
-const list = document.querySelector('.list')
 const input = document.querySelector('.input')
+const list = document.querySelector('.list')
 const filter = document.querySelector('.filter')
-const clearBtn = document.querySelector('.clear')
+const clearAll = document.querySelector('.clear')
 
 
-// Function
-
-function displayItems() {
-    let itemsFromStorage = getItemsFromStorage()
+// function
+// create a function that display the data from localstorage when page load.
+function displayLocalStorage() {
+    let itemsFromStorage = getItemFromStorage();
+    // for each item in localstorage create an item with function addItemToDOM().
     itemsFromStorage.forEach(item => addItemToDOM(item))
 
-    clearUI()
+    clearUI();
 }
 
 
-function addItemOnSubmit(e) {
+function onAddItemSubmit(e) {
     e.preventDefault()
 
-    const newItem = input.value
+    // get input value
+    let newItem = input.value
+
     if (newItem === '') {
-        alert('Please add an item')
+        alert('You need to add content');
         return;
     }
-    // create item DOM
+    // check if there is another li with the same name.
+    if (checkIfItemExists(newItem)) {
+        alert('That item already exists!')
+        return;
+    }
+    //call function
     addItemToDOM(newItem)
-
-    // add item to storage
     addItemToStorage(newItem)
-
     clearUI()
+
     input.value = ''
 
 }
 
-// create icon
-function createIcon(clases) {
-    const icon = document.createElement('i')
-    icon.className = clases
-    return icon;
-}
-// add item to dom
-
 function addItemToDOM(item) {
-    // create li
+    // create html tag 
     const li = document.createElement('li')
-    li.appendChild(document.createTextNode(item))
+    const deletBtn = createDeletBtn('liBtn')
 
-    // create button
-    const button = document.createElement('button')
-    button.classList.add('delet')
-    const icon = createIcon("fa-solid fa-xmark")
+    li.classList.add('li')
 
-    // append item
-    button.append(icon)
+    // append
+    li.append(document.createTextNode(item))
+    li.append(deletBtn)
     list.append(li)
-    li.append(button)
+}
+
+function createDeletBtn(classes) {
+    const button = document.createElement('button')
+    const icon = btnIcon()
+    button.className = classes
+    button.append(icon)
+    return button;
+
+}
+
+function btnIcon() {
+    const i = document.createElement('i')
+    i.classList.add("fa-solid", "fa-xmark")
+    return i;
 }
 
 function addItemToStorage(item) {
-    let itemsFromStorage = getItemsFromStorage();
-    // add new item to array
+    let itemsFromStorage = getItemFromStorage();
+
+
     itemsFromStorage.push(item)
 
-    // convert to json string and set to localstorage
+    // Convert to json string and set to local storage
     localStorage.setItem('items', JSON.stringify(itemsFromStorage))
 }
 
-function getItemsFromStorage() {
+// make a function that set an empty array or get the data from localstorage array.
+function getItemFromStorage() {
     let itemsFromStorage;
     if (localStorage.getItem('items') === null) {
         itemsFromStorage = []
     } else {
         itemsFromStorage = JSON.parse(localStorage.getItem('items'))
     }
-    return itemsFromStorage
+    return itemsFromStorage;
 }
 
 function onClickItem(e) {
-    if (e.target.parentElement.classList.contains('delet')) {
-        deletLi(e.target.parentElement.parentElement);
+    if (e.target.parentElement.parentElement.classList.contains('li')) {
+        // daca obiectul apasat este buton atunci invocam aceasta functie.
+        removeItem(e.target.parentElement.parentElement)
     }
+
 }
 
-function deletLi(item) {
-    if (confirm('Are you sure?')) {
-        // remove item from DOM
-        item.remove();
-        // Remove item from storage
-        removeItemFromStorage(item.textContent)
-    }
+// check if the item in li exist and if(true) then return this function and call it up in onAddItemSubmit(e)
+function checkIfItemExists(item) {
+    let itemsFromStorage = getItemFromStorage();
+    return itemsFromStorage.includes(item)
+}
+
+function removeItem(item) {
+    // remove item from DOM
+    // item primeste aceasta valoare (e.target.parentElement.parentElement).
+    item.remove()
+
+    //remove item from storage
+    // o functie separa in care dam datele li.textContent
+
+    removeItemFromStorage(item.textContent)
+
     clearUI()
 }
 
 function removeItemFromStorage(item) {
-    let itemsFromStorage = getItemsFromStorage()
-    // Filter out item to be removed
-    itemsFromStorage = itemsFromStorage.filter((i) => i !== item)
-    // Reset to localstorage
+    let itemsFromStorage = getItemFromStorage();
+    // filter out item to be removed
+    // Aici i primeste li.textContent cel pe care am pasat sa il eliminam si se verifica daca acel text este la fel cu text-ul din array atunci il va sterge
+    itemsFromStorage = itemsFromStorage.filter(i => i !== item)
+
+    // Re-set to localstorage
+    // Aici dupa verificarea cu filter() intoarcem datele inapoi in storage cu schimbarile aduse eliminarea unui item in cazul asta.
     localStorage.setItem('items', JSON.stringify(itemsFromStorage))
 }
 
-
-function cleareAll() {
+function deletAll() {
     while (list.firstChild) {
         list.removeChild(list.firstChild)
     }
-    // Clear from localstorgae
+
+    // clear from localstorage
     localStorage.removeItem('items')
+
     clearUI()
 }
 
-function clearUI() {
-    const items = list.querySelectorAll('li')
-    if (items.length === 0) {
-        clearBtn.classList.add('remove')
-        filter.classList.add('remove')
-    } else {
-        clearBtn.classList.remove('remove')
-        filter.classList.remove('remove')
-    }
-
-}
-
+// Create a function where we compare the  li firstChild textContent with the value put in filter input. create 2 variabel 1 take the text from li and one take filter value.
 function filterItm(e) {
-    const items = list.querySelectorAll('li')
-    let text = e.target.value.toLowerCase();
+    let items = document.querySelectorAll('li')
+    const liText = e.target.value.toLowerCase()
 
     items.forEach(item => {
-        let itemName = item.firstChild.textContent.toLowerCase();
-        if (itemName.indexOf(text) != -1) {
-            item.classList.remove('remove')
+        const itemName = item.firstChild.textContent.toLowerCase()
+        // this check if liText(input text) its the same with itemName(li text).
+        // litext e diferit de itemName ? daca da atunci -1 daca nu atunci 0.
+        if (itemName.indexOf(liText) != -1) {
+            item.style.display = 'block'
+            // we are using != bcs if itemName.indexOf(liText) it's true(0) then 0 != -1
+            // and 0 is not equal with -1 (0 != -1)
         } else {
-            item.classList.add('remove')
+            item.style.display = 'none'
         }
     })
-
 }
 
-// Global Event
-form.addEventListener('submit', addItemOnSubmit)
+function clearUI() {
+    let li = document.querySelectorAll('li')
+    if (li.length === 0) {
+        clearAll.classList.add('remove')
+        filter.classList.add('remove')
+    } else {
+        clearAll.classList.remove('remove')
+        filter.classList.remove('remove')
+    }
+}
+
+
+// Global event
+form.addEventListener('submit', onAddItemSubmit)
 list.addEventListener('click', onClickItem)
-clearBtn.addEventListener('click', cleareAll)
+clearAll.addEventListener('click', deletAll)
 filter.addEventListener('input', filterItm)
-document.addEventListener('DOMContentLoaded', displayItems)
+document.addEventListener('DOMContentLoaded', displayLocalStorage)
 
 clearUI()
