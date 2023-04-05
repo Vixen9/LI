@@ -1,14 +1,7 @@
-li {
-    list-style: none;
-}
-
-li button {
-    margin: 10px;
+.liBtn {
     background: none;
     border: none;
-    color: red;
 }
-
 
 .remove {
     display: none;
